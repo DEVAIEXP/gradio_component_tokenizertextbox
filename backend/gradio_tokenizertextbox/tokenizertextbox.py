@@ -2,10 +2,11 @@
 # backend/tokenizer_playground/__init__.py
 #
 from __future__ import annotations
-from typing import Any, Callable, Literal, Sequence
+from typing import Any, Callable, List, Literal, Sequence
 
 from gradio.components.base import Component, FormComponent
 from gradio.events import Events
+import gradio as gr
 
 class TokenizerTextBox(FormComponent):
     """
@@ -22,8 +23,7 @@ class TokenizerTextBox(FormComponent):
         # Custom parameters for this component
         model: str = "Xenova/gpt-3",
         display_mode: Literal['text', 'token_ids', 'hidden'] = 'text',
-        
-        # Textbox-like props that are passed to the frontend
+        hide_input: bool = False,           
         lines: int = 2,
         max_lines: int | None = None,
         placeholder: str | None = None,
@@ -45,11 +45,8 @@ class TokenizerTextBox(FormComponent):
         interactive: bool | None = None,
         visible: bool = True,
         elem_id: str | None = None,
-        elem_classes: list[str] | str | None = None,
-        
-        # ** THE DEFINITIVE FIX IS HERE **
-        # This accepts any other keyword arguments (like 'render') that Gradio
-        # might pass internally, preventing a TypeError.
+        elem_classes: list[str] | str | None = None,      
+      
         **kwargs,
     ):
         """
@@ -59,6 +56,7 @@ class TokenizerTextBox(FormComponent):
             value: The initial value. Can be a string to initialize the text, or a dictionary for full state. If a function is provided, it will be called when the app loads to set the initial value.
             model: The name of a Hugging Face tokenizer to use (must be compatible with Transformers.js). Defaults to "Xenova/gpt-2".
             display_mode: Controls the content of the token visualization panel. Can be 'text' (default), 'token_ids', or 'hidden'.
+            hide_input: If True, the component's own textbox is hidden, turning it into a read-only visualizer. Defaults to False.
             lines: The minimum number of line rows for the textarea.
             max_lines: The maximum number of line rows for the textarea.
             placeholder: A placeholder hint to display in the textarea when it is empty.
@@ -82,8 +80,11 @@ class TokenizerTextBox(FormComponent):
         """
         # Store all the custom/frontend-specific props on the instance.
         # Gradio will automatically pass these to the Svelte component.
+        
+                 
         self.model = model
-        self.display_mode = display_mode
+        self.display_mode = display_mode       
+        self.hide_input = hide_input
         self.lines = lines
         self.max_lines = max_lines
         self.placeholder = placeholder
@@ -93,7 +94,7 @@ class TokenizerTextBox(FormComponent):
         self.rtl = rtl
         self.show_copy_button = show_copy_button
         self.max_length = max_length
-
+        
         # Call the parent constructor with ONLY the arguments it expects,
         # plus the catch-all kwargs.
         super().__init__(
@@ -108,7 +109,7 @@ class TokenizerTextBox(FormComponent):
             visible=visible,
             elem_id=elem_id,
             elem_classes=elem_classes,
-            value=value,
+            value=value,            
             **kwargs, # Pass any extra arguments up the chain.
         )
 

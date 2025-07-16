@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_tokenizertextbox`
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.1%20-%20orange">  
+<a href="https://pypi.org/project/gradio_tokenizertextbox/" target="_blank"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/gradio_tokenizertextbox"></a>  
 
 Textbox tokenizer
 
@@ -30,7 +30,7 @@ import gradio as gr
 from gradio_tokenizertextbox import TokenizerTextBox 
 import json
 
-
+# --- Data and Helper Functions ---
 
 TOKENIZER_OPTIONS = {
     "Xenova/clip-vit-large-patch14": "CLIP ViT-L/14",
@@ -47,11 +47,8 @@ TOKENIZER_OPTIONS = {
     "Xenova/c4ai-command-r-v01-tokenizer": "Cohere Command-R",
     "Xenova/t5-small": "T5",
     "Xenova/bert-base-cased": "bert-base-cased",
-  
 }
 
-# 2. Prepare the choices for the gr.Dropdown component
-# The format is a list of tuples: [(display_name, internal_value)]
 dropdown_choices = [
     (display_name, model_name) 
     for model_name, display_name in TOKENIZER_OPTIONS.items()
@@ -66,18 +63,17 @@ def process_output(tokenization_data):
     return tokenization_data
 
 # --- Gradio Application ---
-with gr.Blocks() as demo:
+with gr.Blocks(theme=gr.themes.Soft()) as demo:
+    # --- Header and Information ---
     gr.Markdown("# TokenizerTextBox Component Demo")
-    gr.Markdown("# Component idea taken from the original example application on [Xenova Tokenizer Playground](https://github.com/huggingface/transformers.js-examples/tree/main/the-tokenizer-playground) ")
-    gr.Markdown("## Select a tokenizer from the dropdown menu to see how it processes your text in real-time.")
-    gr.Markdown("## For more models, check out the [Xenova Transformers Models](https://huggingface.co/Xenova/models) page.")
+    gr.Markdown("Component idea taken from the original example application on [Xenova Tokenizer Playground](https://github.com/huggingface/transformers.js-examples/tree/main/the-tokenizer-playground)")
     
+    # --- Global Controls (affect both tabs) ---
     with gr.Row():
-        # 3. Create the Dropdown for model selection
         model_selector = gr.Dropdown(
             label="Select a Tokenizer",
             choices=dropdown_choices,
-            value="Xenova/clip-vit-large-patch14", # Set a default value
+            value="Xenova/clip-vit-large-patch14",
         )
         
         display_mode_radio = gr.Radio(
@@ -85,49 +81,74 @@ with gr.Blocks() as demo:
             label="Display Mode",
             value="text"
         )
-    
-    # 4. Initialize the component with a default model
-    tokenizer_input = TokenizerTextBox(
-        label="Type your text here",
-        value="Gradio is an awesome tool for building ML demos!",
-        model="Xenova/clip-vit-large-patch14", # Must match the dropdown's default value
-        display_mode="text",
-    )
-    
-    output_info = gr.JSON(label="Component Output (from preprocess)")
 
-    # --- Event Listeners ---
+    # --- Tabbed Interface for Different Modes ---
+    with gr.Tabs():
+        # --- Tab 1: Standalone Mode ---
+        with gr.TabItem("Standalone Mode"):
+            gr.Markdown("### In this mode, the component acts as its own interactive textbox.")
+            
+            standalone_tokenizer = TokenizerTextBox(
+                label="Type your text here",
+                value="Gradio is an awesome tool for building ML demos!",
+                model="Xenova/clip-vit-large-patch14",
+                display_mode="text",
+            )
+            
+            standalone_output = gr.JSON(label="Component Output")
+            standalone_tokenizer.change(process_output, standalone_tokenizer, standalone_output)
 
-    # A. When the tokenizer component changes, update the JSON output
-    tokenizer_input.change(
-        fn=process_output, 
-        inputs=tokenizer_input, 
-        outputs=output_info
-    )
+        # --- Tab 2: Listener ("Push") Mode ---
+        with gr.TabItem("Listener Mode"):
+            gr.Markdown("### In this mode, the component is a read-only visualizer for other text inputs.")
+            
+            with gr.Row():
+                prompt_1 = gr.Textbox(label="Prompt Part 1", value="A photorealistic image of an astronaut")
+                prompt_2 = gr.Textbox(label="Prompt Part 2", value="riding a horse on Mars")
 
-    # B. When the dropdown value changes, update the 'model' prop of our component
-    def update_tokenizer_model(selected_model):
-        return gr.update(model=selected_model)
+            visualizer = TokenizerTextBox(
+                label="Concatenated Prompt Visualization",
+                hide_input=True, # Hides the internal textbox
+                model="Xenova/clip-vit-large-patch14",
+                display_mode="text",
+            )
+            
+            visualizer_output = gr.JSON(label="Visualizer Component Output")
+
+            # --- "Push" Logic ---
+            def update_visualizer_text(p1, p2):
+                concatenated_text = f"{p1}, {p2}"
+                # Return a new value for the visualizer.
+                # The postprocess method will correctly handle this string.
+                return gr.update(value=concatenated_text)
+
+            # Listen for changes on the source textboxes
+            prompt_1.change(update_visualizer_text, [prompt_1, prompt_2], visualizer)
+            prompt_2.change(update_visualizer_text, [prompt_1, prompt_2], visualizer)
+
+            # Also connect the visualizer to its own JSON output
+            visualizer.change(process_output, visualizer, visualizer_output)
+
+            # Run once on load to show the initial state
+            demo.load(update_visualizer_text, [prompt_1, prompt_2], visualizer)
+
+    # --- Link Global Controls to Both Components ---
+    # Create a list of all TokenizerTextBox components that need to be updated
+    all_tokenizers = [standalone_tokenizer, visualizer]
 
     model_selector.change(
-        fn=update_tokenizer_model,
+        fn=lambda model: [gr.update(model=model) for _ in all_tokenizers],
         inputs=model_selector,
-        outputs=tokenizer_input
+        outputs=all_tokenizers
     )
-
-    # C. When the radio button value changes, update the 'display_mode' prop
-    def update_display_mode(mode):
-        return gr.update(display_mode=mode)
-
     display_mode_radio.change(
-        fn=update_display_mode,
+        fn=lambda mode: [gr.update(display_mode=mode) for _ in all_tokenizers],
         inputs=display_mode_radio,
-        outputs=tokenizer_input
+        outputs=all_tokenizers
     )
 
 if __name__ == '__main__':
     demo.launch()
-
 ```
 
 ## `TokenizerTextBox`
@@ -183,6 +204,19 @@ str
 </td>
 <td align="left"><code>"text"</code></td>
 <td align="left">Controls the content of the token visualization panel. Can be 'text' (default), 'token_ids', or 'hidden'.</td>
+</tr>
+
+<tr>
+<td align="left"><code>hide_input</code></td>
+<td align="left" style="width: 25%;">
+
+```python
+bool
+```
+
+</td>
+<td align="left"><code>False</code></td>
+<td align="left">If True, the component's own textbox is hidden, turning it into a read-only visualizer. Defaults to False.</td>
 </tr>
 
 <tr>
