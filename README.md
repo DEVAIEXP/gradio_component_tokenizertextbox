@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_tokenizertextbox`
-<a href="https://pypi.org/project/gradio_tokenizertextbox/" target="_blank"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/gradio_tokenizertextbox"></a>  
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.2%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_tokenizertextbox"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>Component GitHub Code</a></span></p>
 
 Textbox tokenizer
 
