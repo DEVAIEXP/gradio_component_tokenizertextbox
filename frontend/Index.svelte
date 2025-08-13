@@ -219,7 +219,7 @@
 		width: 16px;
 		height: 16px;
 		border: 1px solid var(--body-text-color-subdued); /* A visible border in both themes */
-		border-radius: var(--radius-sm);
+		border-radius:  0; /*var(--radius-sm);*/
 		background-color: var(--background-fill-primary);
 		cursor: pointer;
 		position: relative;
@@ -279,4 +279,3 @@
 		word-break: break-all; 
 	}
 </style>
-Use code with caution.

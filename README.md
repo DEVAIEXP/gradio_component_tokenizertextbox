@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_tokenizertextbox`
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.2%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_tokenizertextbox"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>Component GitHub Code</a></span></p>
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.3%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_tokenizertextbox"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>Component GitHub Code</a></span></p>
 
 Textbox tokenizer
 
@@ -87,6 +87,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
         # --- Tab 1: Standalone Mode ---
         with gr.TabItem("Standalone Mode"):
             gr.Markdown("### In this mode, the component acts as its own interactive textbox.")
+            gr.Markdown("<span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>GitHub Code</a></span>")
             
             standalone_tokenizer = TokenizerTextBox(
                 label="Type your text here",

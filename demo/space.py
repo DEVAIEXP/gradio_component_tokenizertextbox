@@ -102,6 +102,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
         # --- Tab 1: Standalone Mode ---
         with gr.TabItem("Standalone Mode"):
             gr.Markdown("### In this mode, the component acts as its own interactive textbox.")
+            gr.Markdown("<span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>GitHub Code</a></span>")
             
             standalone_tokenizer = TokenizerTextBox(
                 label="Type your text here",
