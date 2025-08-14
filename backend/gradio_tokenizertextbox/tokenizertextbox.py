@@ -24,6 +24,8 @@ class TokenizerTextBox(FormComponent):
         model: str = "Xenova/gpt-3",
         display_mode: Literal['text', 'token_ids', 'hidden'] = 'text',
         hide_input: bool = False,           
+        model_max_length: int | None = None,
+        preview_tokens: bool = False,
         lines: int = 2,
         max_lines: int | None = None,
         placeholder: str | None = None,
@@ -57,6 +59,8 @@ class TokenizerTextBox(FormComponent):
             model: The name of a Hugging Face tokenizer to use (must be compatible with Transformers.js). Defaults to "Xenova/gpt-2".
             display_mode: Controls the content of the token visualization panel. Can be 'text' (default), 'token_ids', or 'hidden'.
             hide_input: If True, the component's own textbox is hidden, turning it into a read-only visualizer. Defaults to False.
+            model_max_length: The maximum number of tokens for the model. If the token count exceeds this, the counter will turn red. If not provided, the component will try to detect it from the loaded tokenizer.
+            preview_tokens: If True, the component displays the formatted tokens.
             lines: The minimum number of line rows for the textarea.
             max_lines: The maximum number of line rows for the textarea.
             placeholder: A placeholder hint to display in the textarea when it is empty.
@@ -85,6 +89,8 @@ class TokenizerTextBox(FormComponent):
         self.model = model
         self.display_mode = display_mode       
         self.hide_input = hide_input
+        self.model_max_length = model_max_length
+        self.preview_tokens = preview_tokens
         self.lines = lines
         self.max_lines = max_lines
         self.placeholder = placeholder

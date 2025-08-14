@@ -67,8 +67,9 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             standalone_tokenizer = TokenizerTextBox(
                 label="Type your text here",
                 value="Gradio is an awesome tool for building ML demos!",
-                model="Xenova/clip-vit-large-patch14",
+                model="Xenova/clip-vit-large-patch14",                
                 display_mode="text",
+                preview_tokens=True
             )
             
             standalone_output = gr.JSON(label="Component Output")

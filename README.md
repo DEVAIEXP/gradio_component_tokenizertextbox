@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_tokenizertextbox`
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.3%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_tokenizertextbox"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>Component GitHub Code</a></span></p>
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.5%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_tokenizertextbox"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_tokenizertextbox'>Component GitHub Code</a></span></p>
 
 Textbox tokenizer
 
@@ -92,8 +92,9 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             standalone_tokenizer = TokenizerTextBox(
                 label="Type your text here",
                 value="Gradio is an awesome tool for building ML demos!",
-                model="Xenova/clip-vit-large-patch14",
+                model="Xenova/clip-vit-large-patch14",                
                 display_mode="text",
+                preview_tokens=True
             )
             
             standalone_output = gr.JSON(label="Component Output")
@@ -218,6 +219,32 @@ bool
 </td>
 <td align="left"><code>False</code></td>
 <td align="left">If True, the component's own textbox is hidden, turning it into a read-only visualizer. Defaults to False.</td>
+</tr>
+
+<tr>
+<td align="left"><code>model_max_length</code></td>
+<td align="left" style="width: 25%;">
+
+```python
+int | None
+```
+
+</td>
+<td align="left"><code>None</code></td>
+<td align="left">The maximum number of tokens for the model. If the token count exceeds this, the counter will turn red. If not provided, the component will try to detect it from the loaded tokenizer.</td>
+</tr>
+
+<tr>
+<td align="left"><code>preview_tokens</code></td>
+<td align="left" style="width: 25%;">
+
+```python
+bool
+```
+
+</td>
+<td align="left"><code>False</code></td>
+<td align="left">If True, the component displays the formatted tokens.</td>
 </tr>
 
 <tr>

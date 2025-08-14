@@ -22,7 +22,9 @@
 	export let hide_input: boolean = false;
 	export let model: string;
 	export let display_mode: 'text' | 'token_ids' | 'hidden';
-	
+	export let model_max_length: number | undefined = undefined;
+	export let preview_tokens: boolean = false
+
 	// All other standard Textbox props
 	export let label: string;
 	export let info: string | undefined;
@@ -50,11 +52,11 @@
 
 	// --- INTERNAL STATE ---
 	let tokenizer: any = null;
-	let status: string = "Initializing...";
-	let showVisualization = true;
+	let status: string = "Initializing...";	
 	const colors = ["#d8b4fe", "#bbf7d0", "#fde047", "#fca5a5", "#93c5fd"];
 	let currentModel: string = "";
 	let lastTokenizedText: string | null = null; // Used to prevent infinite loops
+	let detected_max_length: number | undefined = undefined;
 
 	// --- CORE FUNCTIONS ---
 	async function run_tokenization(text_to_process: string) {
@@ -88,11 +90,14 @@
 		status = `Loading tokenizer: ${model_name}...`;
 		currentModel = model_name;
 		tokenizer = null;
-		
+		detected_max_length = undefined;
+
 		try {
 			tokenizer = await AutoTokenizer.from_pretrained(model_name);
 			status = `Tokenizer "${model_name}" loaded.`;
-			
+			if (tokenizer.model_max_length) {
+				detected_max_length = tokenizer.model_max_length;
+			}
 			// Reset the tracker and re-tokenize with the new model
 			lastTokenizedText = null; 
 			await run_tokenization(value.text); 
@@ -115,6 +120,9 @@
 	$: if (model && model !== currentModel) {
 		loadTokenizer(model);
 	}
+	$: effective_max_length = detected_max_length !== undefined && detected_max_length != null ? detected_max_length : (model_max_length !== undefined && model_max_length != null ? model_max_length : null);
+	$: token_count = value?.tokens?.length || 0;
+	$: tokens_exceeded = effective_max_length ? token_count > effective_max_length : false;
 </script>
 
 <Block {visible} {elem_id} {elem_classes} {scale} {min_width} allow_overflow={false} padding={container}>
@@ -125,11 +133,13 @@
 	<div class="component-header">
 		{#if display_mode !== 'hidden'}
 			<div class="visualization-toggle">
-				<input type="checkbox" id="show-viz-{elem_id}" bind:checked={showVisualization}>
+				<input type="checkbox" id="show-viz-{elem_id}" bind:checked={preview_tokens}>
 				<label for="show-viz-{elem_id}">Preview tokens</label>
 			</div>
 			<div class="counters">
-				<span>Tokens: {value?.tokens?.length || 0}</span>
+				<span class:exceeded={tokens_exceeded}>
+					Tokens: {token_count}{#if effective_max_length}/{effective_max_length}{/if}
+				</span>
 				<span>Characters: {value?.text?.length || 0}</span>
 			</div>
 		{/if}
@@ -161,7 +171,7 @@
 	{/if}
 	
 	<!-- The visualization panel -->
-	{#if showVisualization && display_mode !== 'hidden'}
+	{#if preview_tokens && display_mode !== 'hidden'}
 		<div class="token-visualization-container">
 			{#if display_mode === 'text'}
 				<div class="token-display">
@@ -251,7 +261,10 @@
 		color: var(--neutral-500); 
 		font-family: var(--font-mono); 
 	}
-
+	.counters span.exceeded {
+		color: var(--color-red-500, #ef4444); 
+		font-weight: var(--text-weight-bold);
+	}
 	/* Styles for the visualization panel */
 	.token-visualization-container { 
 		margin-top: var(--spacing-lg); 
